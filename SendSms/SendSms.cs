@@ -7,7 +7,6 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
@@ -18,8 +17,11 @@ namespace TygerSygnal
         [FunctionName("SendSms")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "tygerbytes/sygnal")] HttpRequest req,
-            ILogger log)
+            ILogger log,
+            ExecutionContext context)
         {
+            var funcConfig = new FuncConfig(context);
+
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var request = JsonConvert.DeserializeObject<SendSmsRequest>(requestBody);
             if (!request.IsValid())
@@ -29,15 +31,14 @@ namespace TygerSygnal
 
             log.LogInformation(Utils.ToJson(request));
 
-            TwilioClient.Init(FuncContext.TwilioAccountSid, FuncContext.TwilioAuthToken);
-
+            await funcConfig.TwilioInitAsync();
             try
             {
                 foreach (var number in Utils.SplitTo<PhoneNumber>(request.ToPhoneNumbers))
                 {
                     var messageResource = MessageResource.Create(
-                        body: $"{request.Message}\n{FuncContext.SmsSignature}",
-                        from: FuncContext.TwilioPhoneNumber,
+                        body: $"{request.Message}\n{funcConfig.SmsSignature}",
+                        from: funcConfig.TwilioPhoneNumber,
                         to: number
                     );
                     log.LogInformation($"SMS to {number} has been {messageResource.Status}.");
