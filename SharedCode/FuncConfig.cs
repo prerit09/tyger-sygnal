@@ -12,7 +12,7 @@ namespace TygerSygnal
     {
         private readonly IConfigurationRoot config;
         private string twilioAuthToken;
-        
+
         private string TwilioAccountSid => this.config["TWILIO_ACCOUNT_SID"];
         public string TwilioPhoneNumber => this.config["TWILIO_PHONE_NUMBER"];
         public string SmsSignature => this.config["SMS_SIGNATURE"];
