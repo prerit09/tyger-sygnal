@@ -55,9 +55,5 @@ namespace TygerSygnal
 
             return new OkObjectResult($"Message sent.");
         }
-
-        
     }
-
-
 }
