@@ -31,7 +31,6 @@ namespace TygerSygnal
 
             log.LogInformation(Utils.ToJson(request));
 
-            funcConfig.InitTwilio();
             try
             {
                 foreach (var number in Utils.SplitTo<PhoneNumber>(request.ToPhoneNumbers))
